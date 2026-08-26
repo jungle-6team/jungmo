@@ -36,6 +36,10 @@ def signup():
 def login_page():
     return render_template('login.html')
 
+@app.route('/main')
+def main():
+    return render_template('main.html')
+
 # 회원가입 API
 @app.route('/api/register', methods=["POST"])
 def register():
@@ -110,7 +114,7 @@ def login():
         return response, 200
     else:
         # print("5 Login Fail")
-        return jsonify({'result':'fail','msg':'아이디 / 비밀번호가 일치하지 않습니다.'})
+        return jsonify({'result':'fail','msg':'아이디 또는 비밀번호가 일치하지 않습니다.'})
         # return render_template('login.html', form=form)
 
 

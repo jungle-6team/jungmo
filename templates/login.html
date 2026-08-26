@@ -80,6 +80,7 @@
           success: function (response) {
             if (response["result"] == "success") {
               alert("로그인 되었습니다.");
+              window.location.href = "/main";
               // window.location.href = "/link"
             } else {
               alert("로그인 실패!");
