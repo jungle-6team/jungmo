@@ -34,7 +34,7 @@
         </div>
 
         <div class="mt-auto p-5">
-          <button class="w-full rounded bg-white py-2 text-sm font-semibold">
+          <button class="w-full rounded bg-white py-2 text-sm font-semibold" onclick = "logout()">
             로그아웃
           </button>
         </div>
@@ -135,6 +135,25 @@
 
       eventSource.onmessage = function(event){
         console.log("알림", event.data);
+      }
+
+      function logout() {
+         $.ajax({
+          type:"POST",
+          url:"/api/logout",
+
+          success: function(response){
+            if(response["result"] == "success"){
+              alert("로그아웃 되었습니다.");
+              window.location.href = "/login";
+
+            }
+          },
+          error : function(xhr) {
+            console.log(xhr.status);
+            console.log(xhr.responseText);
+          }
+        });
       }
     </script>
   </body>

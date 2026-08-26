@@ -3,7 +3,7 @@ from sched import scheduler
 from flask import Flask, jsonify, request, render_template, Response
 
 
-from flask_jwt_extended import JWTManager, create_access_token
+from flask_jwt_extended import JWTManager, create_access_token, unset_jwt_cookies
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from dotenv import load_dotenv
 from pymongo import MongoClient
@@ -115,7 +115,16 @@ def login():
     else:
         return jsonify({'result':'fail','msg':'아이디 또는 비밀번호가 일치하지 않습니다.'})
         # return render_template('login.html', form=form)
+@app.route('/api/logout', methods = ["POST"])
+def logout():
+    response = jsonify({
+        'result':'success',
+        'msg': '로그아웃 되었습니다'
+    })
 
+    unset_jwt_cookies(response)
+
+    return response, 200
 
 # user ID 메인페이지 
 
@@ -288,7 +297,7 @@ class Config:
 
 app.config.from_object(Config())
 
-
+scheduler = APScheduler()
 @scheduler.task('interval', id='schedule_check', seconds = 5, misfire_grace_time = 900)
 def schedule_check():
     query = {
