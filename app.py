@@ -2,7 +2,7 @@ import os
 from flask import Flask, jsonify, request, render_template
 
 
-from flask_jwt_extended import JWTManager, create_access_token
+from flask_jwt_extended import JWTManager, create_access_token, unset_jwt_cookies
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from dotenv import load_dotenv
 from pymongo import MongoClient
@@ -131,7 +131,16 @@ def login():
         # print("5 Login Fail")
         return jsonify({'result':'fail','msg':'아이디 또는 비밀번호가 일치하지 않습니다.'})
         # return render_template('login.html', form=form)
+@app.route('/api/logout', methods = ["POST"])
+def logout():
+    response = jsonify({
+        'result':'success',
+        'msg': '로그아웃 되었습니다'
+    })
 
+    unset_jwt_cookies(response)
+
+    return response, 200
 
 
 #crud 기능
@@ -342,5 +351,36 @@ def meet_join():
         )
 
     return jsonify({'result': 'success'})
+scheduler = APScheduler()
+@scheduler.task('interval', id='schedule_check', seconds = 5, misfire_grace_time = 900)
+def schedule_check():
+    query = {
+        "$expr" :{
+            "$gte" : ["$people", "$peopleCapacity"]
+        }
+    }
+    results = db.find(query) # 고정 사이즈 컬렉션에서 기본 순서는 삽입 순서와 같기 때문에 먼저 추가 된 순으로 탐색
+
+    for result in results:
+        document_id = result["_id"]
+
+        if document_id not in notified_ids:
+            notification_queue.put(result) # queue에 넣었다가 빼면서 알람을 주는 대신 바로 날리면 어떻지? / 알람을 날리는 방법?
+            notified_ids.add(document_id)
+
+@app.route("/notifications")
+def notifications():
+
+    def generate():
+        while True:
+
+            time.sleep(1)
+            yield f"data: 테스트 알림 \n\n" # data에는 알람 보낼 내용 채워야함
+
+    return Response(
+        generate(),
+        mimetype="text/event-stream"
+    )
+
 if __name__ == '__main__':
     app.run('0.0.0.0', port=5001, debug=True)
