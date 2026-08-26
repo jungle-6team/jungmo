@@ -24,7 +24,11 @@ jwt = JWTManager(app)
 
 @app.route('/')
 def home():
-    return render_template('index.html')
+    return render_template('login.html')
+
+@app.route('/signup')
+def signup():
+    return render_template('signup.html')
 
 # 회원가입 API
 @app.route('/api/register', methods=["POST"])
@@ -71,9 +75,6 @@ def checkID():
         })
 
 #로그인 기능
-@app.route('/login')
-def login_page():
-    return render_template('login.html')
 
 
 # 로그인 API
