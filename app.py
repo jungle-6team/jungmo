@@ -1,17 +1,115 @@
-from flask import Flask, render_template, jsonify, request
+from flask import Flask, jsonify, request, render_template
+
+from flask_jwt_extended import JWTManager, create_access_token
+
 from pymongo import MongoClient
-from datetime import datetime
 from bson.objectid import ObjectId
 
-app = Flask(__name__)
+from datetime import datetime, timedelta
 
+import hashlib
+
+app = Flask(__name__)
 client = MongoClient('localhost', 27017)
-db = client.dbjungmo
+db = client.jungmo
+
+
+app.config['JWT_TOKEN_LOCATION'] = ['cookies']
+app.config['JWT_ACCESS_COOKIE_NAME'] = 'access_token'
+app.config['JWT_SECRET_KEY'] = 'DEV'
+
+jwt = JWTManager(app)
+
+#JWt 토큰을 만들 때 필요한 Secret Key
 
 @app.route('/')
 def home():
     return render_template('index.html')
 
+# 회원가입 API
+@app.route('/api/register', methods=["POST"])
+def register():
+   getID = request.form['id_give']
+   getPW = request.form['pw_give']
+   getclass = request.form['class_give']
+
+   #아이디 중복검증
+   user = db.users.find_one({'id':getID})
+
+   if user:
+    return jsonify({
+        'result': 'fail',
+        'msg': '중복 아이디입니다.'
+    })
+   
+    #비밀번호 암호화
+   crypted_pw = hashlib.sha256(getPW.encode('utf-8')).hexdigest()
+
+    #약속된 변수 이름에 맞추어 수정 요함
+   db.users.insert_one({
+        'id': getID,
+        'pw': crypted_pw,
+        'class': getclass
+    })
+
+   return jsonify({'result':'success'})
+
+#사용자 아이디 중복여부 확인(사용자가 가입하기 버튼 클릭전 중복확인을 누를경우를 대비해 따로처리함)
+@app.route('/checkID', methods=["POST"])
+
+def checkID():
+   id_give = request.form['id_give'] #사용자가 입력한 아이디 받아 디비에 중복된 아이디를찾는다
+   user = db.users.find_one({'id':id_give})
+
+   if user:
+      return jsonify({
+         'result':'fail',
+         'msg':'중복아이디 입니다'})
+   return jsonify({
+        'result': 'success',
+        'msg': '사용 가능한 아이디입니다.'
+        })
+
+#로그인 기능
+@app.route('/login')
+def login_page():
+    return render_template('login.html')
+
+
+# 로그인 API
+@app.route('/api/login', methods=["POST"])
+def login():
+    # print("1. 로그인 함수 진입")
+    getID = request.form['id_give']
+    getPW = request.form['pw_give']
+    # print("2. id.pw 받음", getID)
+    crypted_pw = hashlib.sha256(getPW.encode('utf-8')).hexdigest()
+    # print("3. PW hasing")
+    result = db.users.find_one({'id':getID, 'pw':crypted_pw})
+    # print("4. DB searched.")
+    if result :
+        # JWT 토큰 생성 (timedelta의 매개변수로 유효시간 조절)
+        # print("5. Login Success")
+        expires = timedelta(minutes=60)
+        access_token = create_access_token(
+            identity = getID,
+            expires_delta = expires,
+        )
+        # print("6. JWT Created.")
+        response = jsonify({'result' : 'success', 'msg':'로그인 되었습니다.', "token": access_token})
+        response.set_cookie('access_token', access_token, secure = True, samesite = 'Lax')
+        # print("7. Cookies set")
+        # return jsonify({'result':'success', 'token':token})
+        return response, 200
+    else:
+        # print("5 Login Fail")
+        return jsonify({'result':'fail','msg':'아이디 / 비밀번호가 일치하지 않습니다.'})
+        # return render_template('login.html', form=form)
+
+#회원가입 기능
+
+
+#crud 기능
 @app.route('/post')
 def post():
     return render_template('post.html')
@@ -20,6 +118,11 @@ def post():
 def postUpdate():
     return render_template('postUpdate.html')
 
+@app.route('/meetDetail', methods=['GET'])
+def meets_detail():
+    meet_id = request.args.get('meet_id')
+    meet = db.meet.find_one({'_id': ObjectId(meet_id)})
+    return render_template('meetDetail.html', meet=meet)
 
 @app.route('/makeMeet', methods=['POST'])
 def post_MakeMeet():
@@ -82,11 +185,7 @@ def read_meets():
 
     return jsonify({'result': 'success', 'meets': result})
 
-@app.route('/meetDetail', methods=['GET'])
-def meets_detail():
-    meet_id = request.args.get('meet_id')
-    meet = db.meet.find_one({'_id': ObjectId(meet_id)})
-    return render_template('meetDetail.html', meet=meet)
+
 
 @app.route('/meetData', methods=['GET'])
 def get_meet_data():
@@ -117,6 +216,8 @@ def meet_delete():
     db.meet.delete_one({'_id': ObjectId(meet_id)})
 
     return jsonify({'result': 'success', 'msg': '삭제되었습니다.'})
+
+
 
 if __name__ == '__main__':
     app.run('0.0.0.0', port=5001, debug=True)
