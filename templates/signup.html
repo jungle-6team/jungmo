@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='output.css') }}"
+    />
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='login.css') }}"
+    />
+
+    <title>정모:정글모임</title>
+  </head>
+  <body class="flex min-h-screen flex-col items-center justify-center">
+    <img src="{{ url_for('static',filename='logo.svg') }}" />
+    <p class="text-2xl font-bold my-6">회원가입</p>
+
+    <!-- 회원가입 폼 -->
+    <form action="/api/register" method="POST" class="w-full max-w-md">
+      <div class="mb-4">
+        <label class="block mb-2">아이디 입력</label>
+        <div class="flex gap-2">
+          <input
+            class="w-full px-6 py-3 border border-green-700 rounded-sm"
+            id="userid"
+            type="text"
+            name="id_give"
+            required
+            placeholder="아이디를 입력하세요"
+          />
+          <button
+            onclick="checkID()"
+            class="shrink-0 px-4 py-3 border border-gray rounded-sm"
+            type="button"
+          >
+            중복확인
+          </button>
+        </div>
+      </div>
+      <div class="mb-4">
+        <label class="block mb-2">비밀번호 입력</label>
+        <input
+          class="w-full px-6 py-3 border border-green-700 rounded-sm"
+          id="userpwd"
+          type="password"
+          name="pw_give"
+          required
+          placeholder="비밀번호를 입력하세요"
+        />
+      </div>
+      <div class="mb-4">
+        <label class="block mb-2">소속 반</label>
+        <input
+          class="w-full px-6 py-3 border border-green-700 rounded-sm"
+          id="userclass"
+          type="text"
+          name="class_give"
+          placeholder="현재 소속중인 반 입력"
+        />
+      </div>
+      <button
+        onclick="register(event)"
+        class="w-full py-3 bg-green-600 rounded-sm text-white"
+        type="submit"
+      >
+        시작하기
+      </button>
+    </form>
+    <script>
+      // 회원가입하기
+      function register(event) {
+        event.preventDefault();
+
+        $.ajax({
+          type: "POST",
+          url: "/api/register",
+          data: {
+            id_give: $("#userid").val(),
+            pw_give: $("#userpwd").val(),
+            class_give: $("#userclass").val(),
+          },
+          success: function (response) {
+            if (response["result"] == "success") {
+              alert("회원가입이 완료되었습니다.");
+              window.location.href = "/login";
+            } else {
+              alert(response["msg"]);
+            }
+          },
+        });
+      }
+      function checkID() {
+        $.ajax({
+          type: "POST",
+          url: "/checkID",
+          data: {
+            id_give: $("#userid").val(),
+          },
+
+          success: function (response) {
+            console.log(response);
+            if (response["result"] == "success") {
+              alert("사용 가능한 아이디입니다.");
+            } else {
+              alert(response["msg"]);
+            }
+          },
+
+          error: function (xhr) {
+            console.log("상태코드:", xhr.status);
+            console.log("응답:", xhr.responseText);
+          },
+        });
+      }
+    </script>
+  </body>
+</html>
