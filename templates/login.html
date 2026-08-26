@@ -1,0 +1,119 @@
+<!doctype html>
+
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="http://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script>
+      function loginAttempt() {
+        // id_give = $('#login_id').val();
+        // pw_give = $('#login_pw').val();
+
+        $.ajax({
+          type: "POST",
+          url: "/api/login",
+          data: {
+            id_give: $("#userid").val(),
+            pw_give: $("#userpw").val(),
+          },
+          success: function (response) {
+            if (response["result"] == "success") {
+              alert("로그인 되었습니다.");
+              // window.location.href = "/link"
+            } else {
+              alert("로그인 실패!");
+            }
+          },
+        });
+      }
+    </script>
+    <!-- 프리텐다드 폰트 -->
+    <link
+      rel="stylesheet"
+      as="style"
+      crossorigin
+      href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css"
+    />
+
+    <title>로그인</title>
+  </head>
+  <body class="h-full">
+    <div class="flex min-h-full flex-col justify-center px-6 py-12 lg:px-8">
+      <div class="sm:mx-auto sm:w-full sm:max-w-sm">
+        <img
+          src="{{ url_for('static', filename='logo.svg') }}"
+          alt="Your Company"
+          class="mx-auto h-20 w-auto"
+        />
+        <h2
+          class="mt-10 text-center text-2xl/9 font-bold tracking-tight text-gray-900"
+        >
+          로그인
+        </h2>
+      </div>
+
+      <div class="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
+        <form name="inform" action="#" method="POST" class="space-y-6">
+          <div>
+            <label
+              for="login_id"
+              class="block text-sm/6 font-medium text-gray-900"
+            >
+              아이디
+            </label>
+            <div class="mt-2">
+              <input
+                id="userid"
+                type="text"
+                name="login_id"
+                class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
+              />
+            </div>
+          </div>
+
+          <div>
+            <div class="flex items-center justify-between">
+              <label
+                for="password"
+                class="block text-sm/6 font-medium text-gray-900"
+                >비밀번호</label
+              >
+              <div class="text-sm">
+                <a
+                  href="#"
+                  class="font-semibold text-indigo-600 hover:text-indigo-500"
+                  >비밀번호 찾기</a
+                >
+              </div>
+            </div>
+            <div class="mt-2">
+              <input
+                id="userpw"
+                type="password"
+                name="login_pw"
+                class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
+              />
+            </div>
+          </div>
+
+          <div>
+            <button
+              id="login_attempt"
+              type="button"
+              onclick="loginAttempt()"
+              class="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm/6 font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+            >
+              로그인
+            </button>
+          </div>
+        </form>
+
+        <!-- <p class="mt-10 text-center text-sm/6 text-gray-500">
+                Not a member?
+                <a href="#" class="font-semibold text-indigo-600 hover:text-indigo-500">Start a 14 day free trial</a> -->
+      </div>
+    </div>
+  </body>
+</html>
