@@ -1,7 +1,7 @@
 import os
 from flask import Flask, jsonify, request, render_template
 
-from flask_jwt_extended import JWTManager, create_access_token
+from flask_jwt_extended import JWTManager, create_access_token, get_jwt_identity, jwt_required
 from dotenv import load_dotenv
 from pymongo import MongoClient
 from pymongo.server_api import ServerApi
@@ -16,6 +16,7 @@ app = Flask(__name__)
 app.config['JWT_TOKEN_LOCATION'] = ['cookies']
 app.config['JWT_ACCESS_COOKIE_NAME'] = 'access_token'
 app.config['JWT_SECRET_KEY'] = 'DEV'
+app.config['JWT_COOKIE_CSRF_PROTECT'] = False
 
 jwt = JWTManager(app)
 load_dotenv()
@@ -37,8 +38,10 @@ def login_page():
     return render_template('login.html')
 
 @app.route('/main')
+@jwt_required()
 def main():
-    return render_template('main.html')
+    name = get_jwt_identity()
+    return render_template('main.html',name=name)
 
 # 회원가입 API
 @app.route('/api/register', methods=["POST"])
@@ -84,7 +87,7 @@ def checkID():
         'msg': '사용 가능한 아이디입니다.'
         })
 
-#로그인 기능
+
 
 
 # 로그인 API
@@ -108,7 +111,7 @@ def login():
         )
         # print("6. JWT Created.")
         response = jsonify({'result' : 'success', 'msg':'로그인 되었습니다.', "token": access_token})
-        response.set_cookie('access_token', access_token, secure = True, samesite = 'Lax')
+        response.set_cookie('access_token', access_token, secure = False, samesite = 'Lax')
         # print("7. Cookies set")
         # return jsonify({'result':'success', 'token':token})
         return response, 200
@@ -118,23 +121,30 @@ def login():
         # return render_template('login.html', form=form)
 
 
+# user ID 메인페이지 
 
 #crud 기능
 @app.route('/post')
+@jwt_required()
 def post():
-    return render_template('post.html')
+    name = get_jwt_identity()
+    return render_template('post.html',name=name)
 
 @app.route('/post/update', methods=['GET'])
 def postUpdate():
     return render_template('postUpdate.html')
 
+# 포스트 글쓰기 페이지
 @app.route('/meetDetail', methods=['GET'])
+@jwt_required()
 def meets_detail():
     meet_id = request.args.get('meet_id')
     meet = db.meet.find_one({'_id': ObjectId(meet_id)})
-    return render_template('meetDetail.html', meet=meet)
+    name = get_jwt_identity()
+    return render_template('meetDetail.html', meet=meet, name=name)
 
 @app.route('/makeMeet', methods=['POST'])
+@jwt_required()
 def post_MakeMeet():
     title_receive = request.form['title_give']
     content_receive = request.form['content_give']
@@ -144,6 +154,8 @@ def post_MakeMeet():
     time_receive = request.form['time_give']
     closeWhenFull_receive = request.form['closeWhenFull_give'] == 'true'
 
+    author = get_jwt_identity()
+
     meet = {
         'title': title_receive,
         'content': content_receive,
@@ -152,6 +164,7 @@ def post_MakeMeet():
         'day': day_receive,
         'time': time_receive,
         'closeWhenFull': closeWhenFull_receive,
+        'author': author,
         'createdAt': datetime.now()
     }
     db.meet.insert_one(meet)

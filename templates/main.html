@@ -21,7 +21,7 @@
       </div> -->
 
         <div class="px-5 py-7">
-          <p class="mb-2 text-sm text-zinc-500">ysb9912 님</p>
+          <p class="mb-2 text-sm text-zinc-500">{{ name }} 님 환영합니다</p>
 
           <a
             href="/post"
@@ -87,6 +87,7 @@
                 meets[i]["time"],
                 meets[i]["closeWhenFull"],
                 meets[i]["createdAt"],
+                meets[i]["author"],
               );
             }
           },
@@ -101,7 +102,9 @@
         month,
         day,
         time,
+        closeWhenFull,
         createdAt,
+        author,
       ) {
         let temp = `        <article class="flex items-center gap-4 rounded-lg bg-zinc-200 p-4">
           <div class="flex h-24 w-28 shrink-0 items-center justify-center rounded-lg bg-white text-3xl text-zinc-300">
@@ -117,7 +120,7 @@
             ${contnet}
             </p>
             <p class="mt-5 text-xs text-zinc-400">
-              작성자 ysb9912 · ${month}월 ${day}일 ${time}
+              작성자 ${author} · ${month}월 ${day}일 ${time}
             </p>
           </div>
 
