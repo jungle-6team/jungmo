@@ -1,8 +1,9 @@
 <!doctype html>
 <html lang="ko">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>정모:정글모임</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='output.css') }}">
 
@@ -27,18 +28,10 @@
                 </nav>
             </div>
 
-            <div class="w-28">
-              <label for="people" class="mb-1 block text-xs">참여 인원</label>
-              <div class="flex items-center gap-2">
-                <input
-                  id="people"
-                  name="people"
-                  type="number"
-                  min="1"
-                  class="w-20 rounded border border-zinc-300 px-2 py-2 text-sm"
-                />
-                <span class="text-sm">명</span>
-              </div>
+            <div class="mt-auto p-5">
+                <button class="w-full rounded bg-white py-2 text-sm font-semibold">
+                    로그아웃
+                </button>
             </div>
         </aside>
 
@@ -103,17 +96,6 @@
                         class="h-36 w-full resize-none rounded bg-zinc-100 p-3 text-sm outline-none placeholder:text-zinc-400 focus:ring-1 focus:ring-zinc-400"></textarea>
                 </div>
 
-                <!-- 이미지 업로드 -->
-                <div>
-                    <label for="image" class="mb-1 block text-xs">이미지 첨부</label>
-                    <label for="image"
-                        class="flex h-20 cursor-pointer items-center justify-center gap-3 rounded border border-zinc-300 text-zinc-400 hover:bg-zinc-50">
-                        <span class="text-2xl">🖼</span>
-                        <span class="font-semibold">이미지 업로드</span>
-                    </label>
-                    <input id="image" name="image" type="file" accept="image/*" class="hidden">
-                </div>
-
                 <!-- 하단 -->
                 <div class="flex items-center justify-between pt-1">
                     <label class="flex cursor-pointer items-center gap-2 text-xs">
@@ -131,58 +113,24 @@
     </main>
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script>
-      $("#month").on("change", function () {
-        let month = Number($(this).val());
-        let daySelect = $("#day");
+        $("#month").on("change", function () {
+            let month = Number($(this).val());
+            let daySelect = $("#day");
 
-        let lastDay = 31;
+            let lastDay = 31;
 
-        if ([4, 6, 9, 11].includes(month)) {
-          lastDay = 30;
-        } else if (month === 2) {
-          lastDay = 28;
-        }
-
-        daySelect.empty();
-        daySelect.append('<option value="">일</option>');
-
-        for (let day = 1; day <= lastDay; day++) {
-          daySelect.append(`<option value="${day}">${day}일</option>`);
-        }
-      });
-
-      $("#meet-form").on("submit", function (event) {
-        event.preventDefault();
-
-        let title = $("#title").val();
-        let content = $("#content").val();
-        let people = $("#people").val();
-        let month = $("#month").val();
-        let day = $("#day").val();
-        let time = $("#time").val();
-        let closeWhenFull = $("#close-when-full").is(":checked");
-
-        $.ajax({
-          type: "POST",
-          url: "/makeMeet",
-          data: {
-            title_give: title,
-            content_give: content,
-            people_give: people,
-            month_give: month,
-            day_give: day,
-            time_give: time,
-            closeWhenFull_give: closeWhenFull,
-          },
-          success: function (response) {
-            console.log(response);
-
-            if (response["result"] === "success") {
-              window.location.href = "/";
-            } else {
-              alert("등록에 실패했습니다.");
+            if ([4, 6, 9, 11].includes(month)) {
+                lastDay = 30;
+            } else if (month === 2) {
+                lastDay = 28;
             }
-          },
+
+            daySelect.empty();
+            daySelect.append('<option value="">일</option>');
+
+            for (let day = 1; day <= lastDay; day++) {
+                daySelect.append(`<option value="${day}">${day}일</option>`);
+            }
         });
 
 
@@ -221,5 +169,6 @@
             });
         });
     </script>
-  </body>
+</body>
+
 </html>
