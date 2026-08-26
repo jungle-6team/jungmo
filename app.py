@@ -1,8 +1,10 @@
+import os
 from flask import Flask, jsonify, request, render_template
 
 from flask_jwt_extended import JWTManager, create_access_token
-
+from dotenv import load_dotenv
 from pymongo import MongoClient
+from pymongo.server_api import ServerApi
 from bson.objectid import ObjectId
 
 from datetime import datetime, timedelta
@@ -10,16 +12,16 @@ from datetime import datetime, timedelta
 import hashlib
 
 app = Flask(__name__)
-client = MongoClient('localhost', 27017)
-db = client.jungmo
-
 
 app.config['JWT_TOKEN_LOCATION'] = ['cookies']
 app.config['JWT_ACCESS_COOKIE_NAME'] = 'access_token'
 app.config['JWT_SECRET_KEY'] = 'DEV'
 
 jwt = JWTManager(app)
-
+load_dotenv()
+uri = os.getenv("MONGO_URI")
+client = MongoClient(uri,server_api=ServerApi('1'))
+db = client.jungmo
 #JWt 토큰을 만들 때 필요한 Secret Key
 
 @app.route('/')
@@ -29,6 +31,14 @@ def home():
 @app.route('/signup')
 def signup():
     return render_template('signup.html')
+
+@app.route('/login')
+def login_page():
+    return render_template('login.html')
+
+@app.route('/main')
+def main():
+    return render_template('main.html')
 
 # 회원가입 API
 @app.route('/api/register', methods=["POST"])
@@ -104,10 +114,9 @@ def login():
         return response, 200
     else:
         # print("5 Login Fail")
-        return jsonify({'result':'fail','msg':'아이디 / 비밀번호가 일치하지 않습니다.'})
+        return jsonify({'result':'fail','msg':'아이디 또는 비밀번호가 일치하지 않습니다.'})
         # return render_template('login.html', form=form)
 
-#회원가입 기능
 
 
 #crud 기능

@@ -18,6 +18,7 @@
   <body class="flex min-h-screen flex-col items-center justify-center">
     <img src="{{ url_for('static',filename='logo.svg') }}" />
     <p class="text-2xl font-bold my-6">회원가입</p>
+
     <!-- 회원가입 폼 -->
     <form action="/api/register" method="POST" class="w-full max-w-md">
       <div class="mb-4">
@@ -32,7 +33,7 @@
             placeholder="아이디를 입력하세요"
           />
           <button
-            onclick="cheackID()"
+            onclick="checkID()"
             class="shrink-0 px-4 py-3 border border-gray rounded-sm"
             type="button"
           >
@@ -115,25 +116,6 @@
           },
         });
       }
-      /*
-        //아이디 중복 확인 버튼
-        function cheackID() {
-          $.ajax({
-            type: "POST",
-            url: "/cheackID",
-            data: {
-              id_give: $("#userid").val(),
-            },
-            success: function (response) {
-              if (response["result"] == "success") {
-                alert("사용 가능한 아이디입니다.");
-              } else {
-                alert(response["msg"]);
-              }
-            },
-          });
-        }
-      */
     </script>
   </body>
 </html>
