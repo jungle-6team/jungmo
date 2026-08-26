@@ -28,7 +28,7 @@
             </div>
 
             <div class="mt-auto p-5">
-                <button class="w-full rounded bg-white py-2 text-sm font-semibold">
+                <button class="w-full rounded bg-white py-2 text-sm font-semibold" onclick="logoutAttempt()">
                     로그아웃
                 </button>
             </div>
@@ -133,6 +133,10 @@
                 }
             });
         }
+        function logoutAttempt(){
+            document.cookie = "name = access_token; expires = Thu, 01 Jan 1970 00:00:00 UTC; path=/;"
+            window.location.href = "/login";
+       }
     </script>
 </body>
 
