@@ -1,25 +1,28 @@
-from flask import Flask, jsonify, request, render_template
-
+from flask import Flask, jsonify, request, render_template, Response, stream_with_context, g
 from flask_jwt_extended import JWTManager, create_access_token
 
 from pymongo import MongoClient
 from bson.objectid import ObjectId
-
+from dotenv import load_dotenv
 from datetime import datetime, timedelta
+from pymongo.server_api import ServerApi
+import os
 
 import hashlib
+import json
+from queue import Queue
 
 app = Flask(__name__)
-client = MongoClient('localhost', 27017)
-db = client.jungmo
-
 
 app.config['JWT_TOKEN_LOCATION'] = ['cookies']
 app.config['JWT_ACCESS_COOKIE_NAME'] = 'access_token'
 app.config['JWT_SECRET_KEY'] = 'DEV'
 
 jwt = JWTManager(app)
-
+load_dotenv()
+url = os.getenv("MONGO_URI")
+client = MongoClient(url, server_api=ServerApi('1'))
+db = client.jungmo
 #JWt 토큰을 만들 때 필요한 Secret Key
 
 @app.route('/')
@@ -212,7 +215,65 @@ def meet_delete():
 
     return jsonify({'result': 'success', 'msg': '삭제되었습니다.'})
 
+# SSE
+# user_queues = {}
+
+# @app.route("/api/notifications/stream")
+# def notification_stream():
+
+#     def generate():
+
+#         while True:
+
+#             notification = notification_queue.get()
+#             yield f"data: {json.dumps(notification)}\n\n"
+
+#         return Response(
+#             stream_with_context(generate()),
+#             mimetype="text/event-stream"
+#         )
+# @app.route("api/test-notification", methods=["POST"])
+# def test_notification():
+
+#     #Json 형식 데이터
+#     notification = {
+#         "type" : "test",
+#         "message" : "SSE테스트"
+#     }
+#     notification_queue.put(notification)
+
+#     return {"result":"success"}
+
+# def send_notification():
+#     if user_id in user_queues:
+#         user_queues[user_id].put(notification)
+
+# if __name__ == '__main__':
+#     app.run('0.0.0.0', port=5001, debug=True)
+
+# 5분마다 실행되는 스케쥴러
+from flask_apscheduler import APScheduler
+
+class Config:
+    SCHEDULER_API_ENABLED = True
+
+app.config.from_object(Config())
+
+scheduler = APScheduler()
+scheduler.init_app(app)
+scheduler.start()
+g.notify_queue = Queue()
+
+@scheduler.task('interval', id='schdeule_check', seconds = 5, misfire_grace_time=900)
+def schedule_check():
+    while(True):
+        #모집 예정 인원 <= 신청 인원인 모집
+        results = db.getCollection('jungmo').find({}) 
+        for data in results: 
+            g.notify_queue.put(data);
 
 
-if __name__ == '__main__':
-    app.run('0.0.0.0', port=5001, debug=True)
+        #마감 시간이 얼마 남지 않은 모집 //IDEA -> 생성 시에 마감 시간 -5분 시간을 데이터에 더 저장해 주고, 시간이 되면 알려 주는 식?
+
+        #삭제 된 모집 // 삭제될 때 해당 데이터를 tobeNoticed같은 컬렉션에 저장해 두어야 할듯?
+
