@@ -2,11 +2,13 @@ import os
 from flask import Flask, jsonify, request, render_template
 
 
+
 from flask_jwt_extended import JWTManager, create_access_token, unset_jwt_cookies
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from dotenv import load_dotenv
 from pymongo import MongoClient
 from pymongo.server_api import ServerApi
+from pymongo import ReturnDocument
 from bson.objectid import ObjectId
 
 from datetime import datetime, timedelta
@@ -315,40 +317,39 @@ def meet_join():
     if not meet_id:
         return jsonify({'result': 'error', 'msg': 'meet_id가 없습니다.'})
 
-    meet = db.meet.find_one({'_id': ObjectId(meet_id)})
+meet = db.meet.find_one_and_update(
+    {
+        '_id': ObjectId(meet_id),
+        'user_ids': {'$ne': user_id},
+        '$expr': {'$lt': ['$people', '$peopleCapacity']}
+    },
+    {
+        '$inc': {'people': 1},
+        '$addToSet': {'user_ids': user_id}
+    },
+    return_document=ReturnDocument.AFTER
+)
 
-    if not meet:
-        return jsonify({'result': 'error', 'msg': '모임을 찾을 수 없습니다.'})
+if meet is None:
+    return jsonify({
+        'result': 'fail',
+        'msg': '이미 참여했거나 모집이 마감되었습니다.'
+    })
 
-    if user_id in meet.get("user_ids", []):
-        return jsonify({
-            "result": "fail",
-            "msg": "이미 참여한 모임입니다."
-        })
-
-    if int(meet["people"]) >= int(meet["peopleCapacity"]):
-        return jsonify({
-            "result": "error",
-            "msg": "모집이 마감되었습니다."
-        })
-
-    db.meet.update_one(
-        {'_id': ObjectId(meet_id)},
+if meet['people'] == meet['peopleCapacity']:
+    db.meet.find_one_and_update(
         {
-            '$inc': {'people': 1},
-            '$push': {'user_ids': user_id}
+            '_id': ObjectId(meet_id),
+            'visible': True
+        },
+        {
+            '$set': {
+                'visible': False
+            }
         }
     )
 
-    current_people = int(meet["people"]) + 1
-
-    if current_people >= int(meet["peopleCapacity"]):
-        db.meet.update_one(
-            {'_id': ObjectId(meet_id)},
-            {
-                '$set': {'visible': False}
-            }
-        )
+return jsonify({'result': 'success'})
 
     return jsonify({'result': 'success'})
 scheduler = APScheduler()
