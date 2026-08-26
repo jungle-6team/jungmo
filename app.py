@@ -1,8 +1,6 @@
 import os
 from flask import Flask, jsonify, request, render_template
 
-
-
 from flask_jwt_extended import JWTManager, create_access_token, unset_jwt_cookies
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from dotenv import load_dotenv
@@ -317,41 +315,45 @@ def meet_join():
     if not meet_id:
         return jsonify({'result': 'error', 'msg': 'meet_id가 없습니다.'})
 
-meet = db.meet.find_one_and_update(
-    {
-        '_id': ObjectId(meet_id),
-        'user_ids': {'$ne': user_id},
-        '$expr': {'$lt': ['$people', '$peopleCapacity']}
-    },
-    {
-        '$inc': {'people': 1},
-        '$addToSet': {'user_ids': user_id}
-    },
-    return_document=ReturnDocument.AFTER
-)
-
-if meet is None:
-    return jsonify({
-        'result': 'fail',
-        'msg': '이미 참여했거나 모집이 마감되었습니다.'
-    })
-
-if meet['people'] == meet['peopleCapacity']:
-    db.meet.find_one_and_update(
+    meet = db.meet.find_one_and_update(
         {
             '_id': ObjectId(meet_id),
-            'visible': True
+            'user_ids': {'$ne': user_id},
+            '$expr': {'$lt': ['$people', '$peopleCapacity']}
         },
         {
-            '$set': {
-                'visible': False
-            }
-        }
+            '$inc': {'people': 1},
+            '$addToSet': {'user_ids': user_id}
+        },
+        return_document=ReturnDocument.AFTER
     )
 
-return jsonify({'result': 'success'})
+    if meet is None:
+        return jsonify({
+            'result': 'fail',
+            'msg': '이미 참여했거나 모집이 마감되었습니다.'
+        })
+
+    if meet['people'] == meet['peopleCapacity']:
+        db.meet.find_one_and_update(
+            {
+                '_id': ObjectId(meet_id),
+                'visible': True
+            },
+            {
+                '$set': {
+                    'visible': False
+                }
+            }
+        )
 
     return jsonify({'result': 'success'})
+
+        # return jsonify({'result': 'success'})
+import time
+from apscheduler import APScheduler
+from flask import Response
+
 scheduler = APScheduler()
 @scheduler.task('interval', id='schedule_check', seconds = 5, misfire_grace_time = 900)
 def schedule_check():
