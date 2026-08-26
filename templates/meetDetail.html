@@ -1,8 +1,9 @@
 <!doctype html>
 <html lang="ko">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>모임 상세</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='output.css') }}">
 </head>
@@ -22,8 +23,10 @@
                 </a>
 
                 <nav class="mt-8 space-y-4 text-sm font-medium">
-                    <a href="/main" class="block">전체 게시글</a>
-                    <a href="#" class="block text-zinc-400">참여한 게시글</a>
+          <a href="/main"  class="block text-zinc-700 font-semibold">전체 게시글</a>
+          <a href="/joinMeet" class="block text-zinc-400">
+            참여한 게시글
+          </a>
                 </nav>
             </div>
 
@@ -119,10 +122,10 @@
                 return;
             }
 
-        $.ajax({
-          type: "DELETE",
-          url: "/post/delete",
-          data: { meet_id: meetId },
+            $.ajax({
+                type: "DELETE",
+                url: "/post/delete",
+                data: { meet_id: meetId },
 
                 success: function (response) {
                     if (response["result"] === "success") {

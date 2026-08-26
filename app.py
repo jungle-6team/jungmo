@@ -1,6 +1,5 @@
 import os
-from sched import scheduler
-from flask import Flask, jsonify, request, render_template, Response
+from flask import Flask, jsonify, request, render_template
 
 
 from flask_jwt_extended import JWTManager, create_access_token, unset_jwt_cookies
@@ -44,8 +43,17 @@ def login_page():
 @app.route('/main')
 @jwt_required()
 def main():
-    name = get_jwt_identity()
-    return render_template('main.html',name=name)
+    jwt_id = get_jwt_identity()
+    user = db.users.find_one({'id': jwt_id})
+    return render_template('main.html', user_id=user['id'])
+
+@app.route('/joinMeet')
+@jwt_required()
+def joinMeet():
+    jwt_id = get_jwt_identity()
+    user = db.users.find_one({'id': jwt_id})
+    return render_template('joinMeet.html', user_id=user['id'])
+
 
 # 회원가입 API
 @app.route('/api/register', methods=["POST"])
@@ -91,28 +99,36 @@ def checkID():
         'msg': '사용 가능한 아이디입니다.'
         })
 
-
+#로그인 기능
 
 
 # 로그인 API
 @app.route('/api/login', methods=["POST"])
 def login():
+    # print("1. 로그인 함수 진입")
     getID = request.form['id_give']
     getPW = request.form['pw_give']
+    # print("2. id.pw 받음", getID)
     crypted_pw = hashlib.sha256(getPW.encode('utf-8')).hexdigest()
+    # print("3. PW hasing")
     result = db.users.find_one({'id':getID, 'pw':crypted_pw})
+    # print("4. DB searched.")
     if result :
         # JWT 토큰 생성 (timedelta의 매개변수로 유효시간 조절)
+        # print("5. Login Success")
         expires = timedelta(minutes=60)
         access_token = create_access_token(
             identity = getID,
             expires_delta = expires,
         )
+        # print("6. JWT Created.")
         response = jsonify({'result' : 'success', 'msg':'로그인 되었습니다.', "token": access_token})
         response.set_cookie('access_token', access_token, secure = False, samesite = 'Lax', httponly=True)
+        # print("7. Cookies set")
         # return jsonify({'result':'success', 'token':token})
         return response, 200
     else:
+        # print("5 Login Fail")
         return jsonify({'result':'fail','msg':'아이디 또는 비밀번호가 일치하지 않습니다.'})
         # return render_template('login.html', form=form)
 @app.route('/api/logout', methods = ["POST"])
@@ -126,7 +142,6 @@ def logout():
 
     return response, 200
 
-# user ID 메인페이지 
 
 #crud 기능
 @app.route('/post')
@@ -137,10 +152,12 @@ def post():
     return render_template('post.html', user_id=user['id'])
 
 @app.route('/post/update', methods=['GET'])
+@jwt_required()
 def postUpdate():
-    return render_template('postUpdate.html')
+    jwt_id = get_jwt_identity()
+    user = db.users.find_one({'id': jwt_id})
+    return render_template('postUpdate.html', user_id=user['id'])
 
-# 포스트 글쓰기 페이지
 @app.route('/meetDetail', methods=['GET'])
 @jwt_required()
 def meets_detail():
@@ -162,7 +179,7 @@ def post_MakeMeet():
     time_receive = request.form['time_give']
     closeWhenFull_receive = request.form['closeWhenFull_give'] == 'true'
 
-    author = get_jwt_identity()
+    user_id = get_jwt_identity()
 
     meet = {
         'title': title_receive,
@@ -173,9 +190,12 @@ def post_MakeMeet():
         'day': day_receive,
         'time': time_receive,
         'closeWhenFull': closeWhenFull_receive,
-        'author': author,
-        'createdAt': datetime.now()
+        'createdAt': datetime.now(),
+        'user_id': user_id,
+        'user_ids': [user_id],
+        'visible': True
     }
+
     db.meet.insert_one(meet)
     return jsonify({'result': 'success', 'msg': 'success'})
 
@@ -209,14 +229,50 @@ def post_update_meet():
 
 @app.route('/meets', methods=['GET'])
 def read_meets():
-    result = list(db.meet.find({}).sort('createdAt', -1))
+    order_type = request.args.get('orderType', 'latest')
+
+    if order_type == 'participants':
+        result = list(
+            db.meet.find({'visible': True}).sort('people', -1)
+        )
+    else:
+        result = list(
+            db.meet.find({'visible': True}).sort('createdAt', -1)
+        )
 
     for meet in result:
         meet['_id'] = str(meet['_id'])
         meet['createdAt'] = meet['createdAt'].strftime('%Y.%m.%d %H:%M')
 
-    return jsonify({'result': 'success', 'meets': result})
+    return jsonify({
+        'result': 'success',
+        'meets': result
+    })
 
+
+@app.route('/joinMeets', methods=['GET'])
+@jwt_required()
+def read_join_meets():
+    user_id = request.args.get('user_id')
+    order_type = request.args.get('orderType', 'latest')
+
+    query = db.meet.find({'user_ids': user_id})
+
+    if order_type == "latest":
+        query = query.sort("createdAt", -1)
+    else:
+        query = query.sort("people", -1)
+
+    result = list(query)
+
+    for meet in result:
+        meet['_id'] = str(meet['_id'])
+        meet['createdAt'] = meet['createdAt'].strftime('%Y.%m.%d %H:%M')
+
+    return jsonify({
+        'result': 'success',
+        'meets': result
+    })
 
 
 @app.route('/meetData', methods=['GET'])
@@ -284,19 +340,17 @@ def meet_join():
         }
     )
 
+    current_people = int(meet["people"]) + 1
+
+    if current_people >= int(meet["peopleCapacity"]):
+        db.meet.update_one(
+            {'_id': ObjectId(meet_id)},
+            {
+                '$set': {'visible': False}
+            }
+        )
+
     return jsonify({'result': 'success'})
-
-from flask_apscheduler import APScheduler
-from queue import Queue
-import time
-
-notification_queue = Queue()
-
-class Config:
-    SCHEDULER_API_ENABLED = True
-
-app.config.from_object(Config())
-
 scheduler = APScheduler()
 @scheduler.task('interval', id='schedule_check', seconds = 5, misfire_grace_time = 900)
 def schedule_check():
