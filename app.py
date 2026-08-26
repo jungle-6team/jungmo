@@ -1,7 +1,9 @@
 import os
 from flask import Flask, jsonify, request, render_template
 
-from flask_jwt_extended import JWTManager, create_access_token, get_jwt_identity, jwt_required
+
+from flask_jwt_extended import JWTManager, create_access_token
+from flask_jwt_extended import jwt_required, get_jwt_identity
 from dotenv import load_dotenv
 from pymongo import MongoClient
 from pymongo.server_api import ServerApi
@@ -16,7 +18,8 @@ app = Flask(__name__)
 app.config['JWT_TOKEN_LOCATION'] = ['cookies']
 app.config['JWT_ACCESS_COOKIE_NAME'] = 'access_token'
 app.config['JWT_SECRET_KEY'] = 'DEV'
-app.config['JWT_COOKIE_CSRF_PROTECT'] = False
+# app.config["JWT_COOKIE_SECURE"] = False
+app.config["JWT_COOKIE_CSRF_PROTECT"] = False
 
 jwt = JWTManager(app)
 load_dotenv()
@@ -111,7 +114,7 @@ def login():
         )
         # print("6. JWT Created.")
         response = jsonify({'result' : 'success', 'msg':'로그인 되었습니다.', "token": access_token})
-        response.set_cookie('access_token', access_token, secure = False, samesite = 'Lax')
+        response.set_cookie('access_token', access_token, secure = False, samesite = 'Lax', httponly=True)
         # print("7. Cookies set")
         # return jsonify({'result':'success', 'token':token})
         return response, 200
@@ -127,8 +130,9 @@ def login():
 @app.route('/post')
 @jwt_required()
 def post():
-    name = get_jwt_identity()
-    return render_template('post.html',name=name)
+    jwt_id = get_jwt_identity()
+    user = db.users.find_one({'id': jwt_id})
+    return render_template('post.html', user_id=user['id'])
 
 @app.route('/post/update', methods=['GET'])
 def postUpdate():
@@ -140,15 +144,17 @@ def postUpdate():
 def meets_detail():
     meet_id = request.args.get('meet_id')
     meet = db.meet.find_one({'_id': ObjectId(meet_id)})
-    name = get_jwt_identity()
-    return render_template('meetDetail.html', meet=meet, name=name)
+    jwt_id = get_jwt_identity()
+    user = db.users.find_one({'id': jwt_id})
+    return render_template('meetDetail.html', meet=meet, user_id=user['id'])
 
 @app.route('/makeMeet', methods=['POST'])
 @jwt_required()
 def post_MakeMeet():
     title_receive = request.form['title_give']
     content_receive = request.form['content_give']
-    people_receive = request.form['people_give']
+    people_receive = 1
+    peopleCapacity_receive = request.form['peopleCapacity_give']
     month_receive = request.form['month_give']
     day_receive = request.form['day_give']
     time_receive = request.form['time_give']
@@ -160,6 +166,7 @@ def post_MakeMeet():
         'title': title_receive,
         'content': content_receive,
         'people': people_receive,
+        'peopleCapacity': peopleCapacity_receive,
         'month': month_receive,
         'day': day_receive,
         'time': time_receive,
@@ -241,6 +248,41 @@ def meet_delete():
     return jsonify({'result': 'success', 'msg': '삭제되었습니다.'})
 
 
+@app.route('/post/join', methods=['POST'])
+@jwt_required()
+def meet_join():
+    meet_id = request.form.get('meet_id')
+    user_id = request.form.get('user_id')
+
+    if not meet_id:
+        return jsonify({'result': 'error', 'msg': 'meet_id가 없습니다.'})
+
+    meet = db.meet.find_one({'_id': ObjectId(meet_id)})
+
+    if not meet:
+        return jsonify({'result': 'error', 'msg': '모임을 찾을 수 없습니다.'})
+
+    if user_id in meet.get("user_ids", []):
+        return jsonify({
+            "result": "fail",
+            "msg": "이미 참여한 모임입니다."
+        })
+
+    if int(meet["people"]) >= int(meet["peopleCapacity"]):
+        return jsonify({
+            "result": "error",
+            "msg": "모집이 마감되었습니다."
+        })
+
+    db.meet.update_one(
+        {'_id': ObjectId(meet_id)},
+        {
+            '$inc': {'people': 1},
+            '$push': {'user_ids': user_id}
+        }
+    )
+
+    return jsonify({'result': 'success'})
 
 if __name__ == '__main__':
     app.run('0.0.0.0', port=5001, debug=True)
