@@ -351,8 +351,14 @@ def meet_join():
 
         # return jsonify({'result': 'success'})
 import time
-from apscheduler import APScheduler
+from flask_apscheduler import APScheduler
 from flask import Response
+from queue import Queue
+
+notification_queue = Queue()
+
+class Config:
+    SCHEDULER_API_ENABLED = True
 
 scheduler = APScheduler()
 @scheduler.task('interval', id='schedule_check', seconds = 5, misfire_grace_time = 900)
