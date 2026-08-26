@@ -11,11 +11,9 @@
   </head>
 
   <body class="min-h-screen bg-zinc-100 font-sans text-zinc-700">
-    <main
-      class="mx-auto mt-10 flex min-h-[620px] max-w-5xl overflow-hidden border border-zinc-800 bg-white"
-    >
+    <main class="flex min-h-screen">
       <!-- 왼쪽 메뉴 -->
-      <aside class="flex w-60 flex-col bg-zinc-200">
+      <aside class="flex w-60 shrink-0 flex-col bg-zinc-200">
         <!-- <div class="bg-zinc-400 px-7 py-4 text-xl font-bold text-white">
         302 반
       </div> -->
@@ -25,7 +23,7 @@
 
           <a
             href="/post"
-            class="block rounded bg-white py-2 text-center text-sm font-semibold text-zinc-400"
+            class="block rounded bg-green-600 py-2 text-center text-sm font-semibold text-white"
           >
             + 글쓰기
           </a>
@@ -44,15 +42,31 @@
       </aside>
 
       <!-- 오른쪽 콘텐츠 -->
-      <section class="flex-1 p-8">
+      <section class="flex-1 min-w-0 p-8">
         <div class="mb-4 flex justify-end">
-          <select
-            id="sort-select"
-            class="cursor-pointer appearance-none bg-transparent pr-6 text-sm font-bold outline-none"
-          >
-            <option value="latest">최신순</option>
-            <option value="participants">참여자 많은 순</option>
-          </select>
+          <div class="relative">
+            <select
+              id="sort-select"
+              class="cursor-pointer appearance-none rounded-sm px-3 pr-6 text-sm font-bold bg-white"
+            >
+              <option value="latest">최신순</option>
+              <option value="participants">참여자 많은 순</option>
+            </select>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke-width="1.5"
+              stroke="currentColor"
+              class="pointer-events-none absolute right-0 top-1/2 size-4 -translate-y-1/2"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="m19.5 8.25-7.5 7.5-7.5-7.5"
+              />
+            </svg>
+          </div>
         </div>
 
         <div id="cards-box" class="space-y-3"></div>
@@ -106,13 +120,11 @@
         createdAt,
         author,
       ) {
-        let temp = `        <article class="flex items-center gap-4 rounded-lg bg-zinc-200 p-4">
-          <div class="flex h-24 w-28 shrink-0 items-center justify-center rounded-lg bg-white text-3xl text-zinc-300">
-            🖼
-          </div>
+        let temp = `        <article class="flex items-end gap-4 rounded-lg bg-white p-4">
+  
 
           <div class="min-w-0 flex-1">
-            <span class="rounded bg-white px-2 py-1 text-xs text-zinc-500">
+            <span class="rounded bg-green-600 px-2 py-1 text-xs text-white">
             ${people}인
             </span>
             <h2 class="mt-2 text-lg font-bold">${title}</h2>
@@ -126,9 +138,12 @@
 
           <a
             href="/meetDetail?meet_id=${id}"
-            class="shrink-0 rounded-full bg-white px-5 py-2 text-sm font-bold"
+            class="flex items-center shrink-0 rounded-full bg-white px-5 py-2 text-midium text-green-600 font-bold"
           >
-          참여하기
+          자세히보기
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="size-4">
+          <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 19.5 15-15m0 0H8.25m11.25 0v11.25" />
+          </svg>
           </a>
         </article>`;
         $("#cards-box").append(temp);

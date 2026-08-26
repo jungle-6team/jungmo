@@ -10,25 +10,21 @@
     />
   </head>
 
-  <body class="min-h-screen bg-zinc-100 font-sans text-zinc-600">
-    <main
-      class="mx-auto mt-10 flex min-h-[620px] max-w-5xl overflow-hidden border border-zinc-800 bg-white"
-    >
+  <body class="min-h-screen bg-zinc-100 font-sans text-zinc-700">
+    <main class="flex min-h-screen">
       <!-- 왼쪽 메뉴 -->
-      <aside class="flex w-60 flex-col bg-zinc-200">
-        <div class="px-7 py-8">
-          <p class="mb-4 text-sm font-medium text-white">
-            {{name}} 님 환영합니다
-          </p>
+      <aside class="flex w-60 shrink-0 flex-col bg-zinc-200">
+        <div class="px-5 py-7">
+          <p class="mb-2 text-sm text-zinc-500">{{name}} 님 환영합니다</p>
 
           <a
             href="/post"
-            class="block rounded bg-white py-2 text-center text-sm font-semibold text-zinc-400"
+            class="block rounded bg-green-600 py-2 text-center text-sm font-semibold text-white"
           >
             + 글쓰기
           </a>
 
-          <nav class="mt-8 space-y-4 text-sm font-medium">
+          <nav class="mt-6 space-y-4 text-sm font-medium">
             <a href="/main" class="block">전체 게시글</a>
             <a href="#" class="block text-zinc-400">참여한 게시글</a>
           </nav>
@@ -42,7 +38,7 @@
       </aside>
 
       <!-- 모임 상세 -->
-      <section class="flex-1 px-10 py-12">
+      <section class="flex-1 px-10 py-12 bg-white">
         <article class="mt-8">
           <!-- 작성자와 작성 시간 -->
           <p class="text-xs text-zinc-400">
@@ -90,7 +86,7 @@
 
             <button
               id="join-button"
-              class="mt-3 w-full rounded bg-zinc-400 py-3 text-sm font-semibold text-white hover:bg-zinc-500"
+              class="mt-3 w-full rounded py-3 bg-green-600 text-sm font-semibold text-white hover:bg-green-700"
             >
               참여하기
             </button>
