@@ -1,33 +1,39 @@
 <!doctype html>
 <html lang="ko">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>정모:정글모임</title>
-    <link
-      rel="stylesheet"
-      href="{{ url_for('static', filename='output.css') }}"
-    />
-  </head>
 
-  <body class="min-h-screen bg-zinc-100 font-sans text-zinc-700">
-    <main class="flex min-h-screen">
-      <!-- 왼쪽 메뉴 -->
-      <aside class="flex w-60 shrink-0 flex-col bg-zinc-200">
-        <!-- <div class="bg-zinc-400 px-7 py-4 text-xl font-bold text-white">
-        302 반
-      </div> -->
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>정모:정글모임</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='output.css') }}" />
+</head>
 
-        <div class="px-5 py-7">
-          <p class="mb-2 text-sm text-zinc-500">{{ name }} 님 환영합니다</p>
+<body class="min-h-screen bg-zinc-100 font-sans text-zinc-700">
+  <main class="mx-auto mt-10 flex min-h-[620px] max-w-5xl overflow-hidden border border-zinc-800 bg-white">
+    <!-- 왼쪽 메뉴 -->
+    <aside class="flex w-60 flex-col bg-zinc-200">
 
-          <a
-            href="/post"
-            class="block rounded bg-green-600 py-2 text-center text-sm font-semibold text-white"
-          >
-            + 글쓰기
+      <div class="px-5 py-7">
+        <p class="mb-2 text-sm text-zinc-500">{{user_id}} 님</p>
+
+        <a href="/post" class="block rounded bg-white py-2 text-center text-sm font-semibold text-zinc-400">
+          + 글쓰기
+        </a>
+
+        <nav class="mt-6 space-y-4 text-sm font-medium">
+          <a href="/main" class="block text-zinc-700 font-semibold">전체 게시글</a>
+          <a href="/joinMeet" class="block text-zinc-400">
+            참여한 게시글
           </a>
+        </nav>
+      </div>
 
+      <div class="mt-auto p-5">
+        <button class="w-full rounded bg-white py-2 text-sm font-semibold">
+          로그아웃
+        </button>
+      </div>
+    </aside>
           <nav class="mt-6 space-y-4 text-sm font-medium">
             <a href="#" class="block">전체 게시글</a>
             <a href="#" class="block text-zinc-400">참여한 게시글</a>
@@ -35,7 +41,7 @@
         </div>
 
         <div class="mt-auto p-5">
-          <button class="w-full rounded bg-white py-2 text-sm font-semibold">
+          <button class="w-full rounded bg-white py-2 text-sm font-semibold" onclick = "logout()">
             로그아웃
           </button>
         </div>
@@ -71,7 +77,6 @@
 
         <div id="cards-box" class="space-y-3"></div>
       </section>
-    </main>
 
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
@@ -81,48 +86,79 @@
         $("#cards-box").html("");
         showMeets();
       });
+      </script>
 
-      function showMeets() {
-        $.ajax({
-          type: "GET",
-          url: "/meets",
-          data: {},
-          success: function (response) {
-            let meets = response["meets"];
-            console.log(meets);
-            for (let i = 0; i < meets.length; i++) {
-              makeCard(
-                meets[i]["_id"],
-                meets[i]["title"],
-                meets[i]["content"],
-                meets[i]["people"],
-                meets[i]["month"],
-                meets[i]["day"],
-                meets[i]["time"],
-                meets[i]["closeWhenFull"],
-                meets[i]["createdAt"],
-                meets[i]["author"],
-              );
-            }
-          },
-        });
-      }
+    <!-- 오른쪽 콘텐츠 -->
+    <section class="flex-1 p-8">
+      <div class="mb-4 flex justify-end">
+        <select id="sort-select"
+          class="cursor-pointer appearance-none bg-transparent pr-6 text-sm font-bold outline-none">
+          <option value="latest">최신순</option>
+          <option value="participants">참여자 많은 순</option>
+        </select>
+      </div>
 
-      function makeCard(
-        id,
-        title,
-        contnet,
-        people,
-        month,
-        day,
-        time,
-        closeWhenFull,
-        createdAt,
-        author,
-      ) {
-        let temp = `        <article class="flex items-end gap-4 rounded-lg bg-white p-4">
-  
+      <div id="cards-box" class="space-y-3"></div>
+    </section>
+  </main>
 
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script>
+    let orderType = "latest";
+
+
+    $(document).ready(function () {
+      $("#cards-box").html("");
+      showMeets();
+    });
+
+    $("#sort-select").on("change", function () {
+      orderType = $(this).val();
+      $("#cards-box").empty();
+      showMeets();
+    });
+
+    function showMeets() {
+      $.ajax({
+        type: "GET",
+        url: "/meets",
+        data: { orderType: orderType },
+        success: function (response) {
+          let meets = response["meets"];
+          console.log(meets);
+          for (let i = 0; i < meets.length; i++) {
+            makeCard(
+              meets[i]["_id"],
+              meets[i]["title"],
+              meets[i]["content"],
+              meets[i]["people"],
+              meets[i]["month"],
+              meets[i]["day"],
+              meets[i]["time"],
+              meets[i]["closeWhenFull"],
+              meets[i]["createdAt"],
+              meets[i]["user_id"]
+            );
+          }
+        },
+      });
+    }
+
+    function makeCard(
+      id,
+      title,
+      contnet,
+      people,
+      month,
+      day,
+      time,
+      closeWhenFull,
+      createdAt,
+      user_id
+    ) {
+      let temp = `        <article class="flex items-center gap-4 rounded-lg bg-zinc-200 p-4">
           <div class="min-w-0 flex-1">
             <span class="rounded bg-green-600 px-2 py-1 text-xs text-white">
             ${people}인
@@ -132,7 +168,7 @@
             ${contnet}
             </p>
             <p class="mt-5 text-xs text-zinc-400">
-              작성자 ${author} · ${month}월 ${day}일 ${time}
+              작성자 ${user_id} ${month}월 ${day}일 ${time}
             </p>
           </div>
 
@@ -146,8 +182,33 @@
           </svg>
           </a>
         </article>`;
-        $("#cards-box").append(temp);
+      $("#cards-box").append(temp);
+    }
+    
+    </script>
+    <script>
+      eventSource.onmessage = function(event){
+        console.log("알림", event.data);
+      }
+      
+      function logout() {
+        $.ajax({
+          type:"POST",
+          url:"/api/logout",
+          
+          success: function(response){
+            if(response["result"] == "success"){
+              alert("로그아웃 되었습니다.");
+              window.location.href = "/login";
+              
+            }
+          },
+          error : function(xhr) {
+            console.log(xhr.status);
+            console.log(xhr.responseText);
+          }
+        });
       }
     </script>
-  </body>
-</html>
+    
+    </html>

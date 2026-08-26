@@ -1,205 +1,174 @@
 <!doctype html>
 <html lang="ko">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>정모:정글모임</title>
-    <link
-      rel="stylesheet"
-      href="{{ url_for('static', filename='output.css') }}"
-    />
-  </head>
+    <link rel="stylesheet" href="{{ url_for('static', filename='output.css') }}">
 
-  <body class="min-h-screen bg-zinc-100 font-sans text-zinc-600">
-    <main class="flex min-h-screen">
-      <!-- 왼쪽 메뉴 -->
-      <aside class="flex w-60 flex-col bg-zinc-200">
-        <div class="px-5 py-7">
-          <p class="mb-2 text-sm text-zinc-500">{{ name }} 님 환영합니다</p>
+</head>
 
-          <a
-            href="/post"
-            class="block rounded bg-green-600 py-2 text-center text-sm font-semibold text-white"
-          >
-            + 글쓰기
-          </a>
+<body class="min-h-screen bg-zinc-100 font-sans text-zinc-600">
+    <main class="mx-auto mt-10 flex min-h-[620px] max-w-5xl overflow-hidden border border-zinc-800 bg-white">
 
-          <nav class="mt-6 space-y-4 text-sm font-medium">
-            <a href="/main" class="block">전체 게시글</a>
-            <a href="#" class="block text-zinc-400">참여한 게시글</a>
-          </nav>
-        </div>
+        <!-- 왼쪽 메뉴 -->
+        <aside class="flex w-60 flex-col bg-zinc-200">
 
-        <div class="mt-auto p-5">
-          <button class="w-full rounded bg-white py-2 text-sm font-semibold">
-            로그아웃
-          </button>
-        </div>
-      </aside>
+            <div class="px-5 py-7">
+                <p class="mb-2 text-sm text-zinc-500">{{user_id}}</p>
 
-      <!-- 글 작성 영역 -->
-      <section class="flex-1 px-8 py-10 bg-white">
-        <form id="meet-form" class="mt-4 space-y-4">
-          <!-- 제목 -->
-          <div>
-            <label for="title" class="mb-1 block text-xs">제목</label>
-            <input
-              id="title"
-              name="title"
-              type="text"
-              placeholder="제목을 입력해주세요."
-              class="w-full rounded border border-zinc-300 px-3 py-2 text-sm outline-none placeholder:text-zinc-400 focus:border-zinc-500"
-            />
-          </div>
+                <a href="/post" class="block rounded bg-white py-2 text-center text-sm font-semibold text-zinc-400">
+                    + 글쓰기
+                </a>
 
-          <!-- 참여 날짜와 인원 -->
-          <div class="flex gap-8">
-            <div class="flex-1">
-              <label class="mb-1 block text-xs">참여 종료 예정</label>
-
-              <div class="flex gap-2">
-                <select
-                  id="month"
-                  name="month"
-                  class="w-16 rounded border border-zinc-300 bg-white px-2 py-2 text-sm"
-                >
-                  <option value="">월</option>
-                  <option value="1">1월</option>
-                  <option value="2">2월</option>
-                  <option value="3">3월</option>
-                  <option value="4">4월</option>
-                  <option value="5">5월</option>
-                  <option value="6">6월</option>
-                  <option value="7">7월</option>
-                  <option value="8">8월</option>
-                  <option value="9">9월</option>
-                  <option value="10">10월</option>
-                  <option value="11">11월</option>
-                  <option value="12">12월</option>
-                </select>
-
-                <select
-                  id="day"
-                  name="day"
-                  class="w-16 rounded border border-zinc-300 bg-white px-2 py-2 text-sm"
-                >
-                  <option value="">일</option>
-                </select>
-
-                <input
-                  id="time"
-                  name="time"
-                  type="time"
-                  value="17:00"
-                  class="rounded border border-zinc-300 px-2 py-2 text-sm"
-                />
-              </div>
+                <nav class="mt-7 space-y-4 text-sm font-medium">
+                    <a href="/main" class="block">전체 게시글</a>
+                    <a href="#" class="block text-zinc-400">참여한 게시글</a>
+                </nav>
             </div>
 
-            <div class="w-28">
-              <label for="people" class="mb-1 block text-xs">참여 인원</label>
-              <div class="flex items-center gap-2">
-                <input
-                  id="people"
-                  name="people"
-                  type="number"
-                  min="1"
-                  class="w-20 rounded border border-zinc-300 px-2 py-2 text-sm"
-                />
-                <span class="text-sm">명</span>
-              </div>
+            <div class="mt-auto p-5">
+                <button class="w-full rounded bg-white py-2 text-sm font-semibold">
+                    로그아웃
+                </button>
             </div>
-          </div>
+        </aside>
 
-          <!-- 본문 -->
-          <div>
-            <label for="content" class="mb-1 block text-xs">본문 내용</label>
-            <textarea
-              id="content"
-              name="content"
-              placeholder="내용을 입력하세요."
-              class="h-36 w-full resize-none rounded border border-zinc-300 p-3 text-sm outline-none placeholder:text-zinc-400 focus:ring-1 focus:ring-zinc-400"
-            ></textarea>
-          </div>
+        <!-- 글 작성 영역 -->
+        <section class="flex-1 px-8 py-10">
 
-          <!-- 하단 -->
-          <div class="flex items-center justify-between pt-1">
-            <label class="flex cursor-pointer items-center gap-2 text-xs">
-              <input
-                id="close-when-full"
-                name="agree"
-                type="checkbox"
-                class="h-4 w-4 accent-zinc-500"
-              />
-              인원이 모두 모이면 모집 종료하기
-            </label>
+            <form id="meet-form" class="mt-4 space-y-4">
+                <!-- 제목 -->
+                <div>
+                    <label for="title" class="mb-1 block text-xs">제목</label>
+                    <input id="title" name="title" type="text" placeholder="제목을 입력해주세요."
+                        class="w-full rounded border border-zinc-300 px-3 py-2 text-sm outline-none placeholder:text-zinc-400 focus:border-zinc-500">
+                </div>
 
-            <button
-              type="submit"
-              class="rounded bg-zinc-400 px-10 py-3 text-sm font-semibold text-white hover:bg-zinc-500"
-            >
-              작성하기
-            </button>
-          </div>
-        </form>
-      </section>
+                <!-- 참여 날짜와 인원 -->
+                <div class="flex gap-8">
+                    <div class="flex-1">
+                        <label class="mb-1 block text-xs">참여 종료 예정</label>
+
+                        <div class="flex gap-2">
+                            <select id="month" name="month"
+                                class="w-16 rounded border border-zinc-300 bg-white px-2 py-2 text-sm">
+                                <option value="">월</option>
+                                <option value="1">1월</option>
+                                <option value="2">2월</option>
+                                <option value="3">3월</option>
+                                <option value="4">4월</option>
+                                <option value="5">5월</option>
+                                <option value="6">6월</option>
+                                <option value="7">7월</option>
+                                <option value="8">8월</option>
+                                <option value="9">9월</option>
+                                <option value="10">10월</option>
+                                <option value="11">11월</option>
+                                <option value="12">12월</option>
+                            </select>
+
+                            <select id="day" name="day"
+                                class="w-16 rounded border border-zinc-300 bg-white px-2 py-2 text-sm">
+                                <option value="">일</option>
+                            </select>
+
+                            <input id="time" name="time" type="time" value="17:00"
+                                class="rounded border border-zinc-300 px-2 py-2 text-sm">
+                        </div>
+                    </div>
+
+                    <div class="w-28">
+                        <label for="peopleCapacity" class="mb-1 block text-xs">참여 인원</label>
+                        <div class="flex items-center gap-2">
+                            <input id="peopleCapacity" name="peopleCapacity" type="number" min="1"
+                                class="w-20 rounded border border-zinc-300 px-2 py-2 text-sm">
+                            <span class="text-sm">명</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 본문 -->
+                <div>
+                    <label for="content" class="mb-1 block text-xs">본문 내용</label>
+                    <textarea id="content" name="content" placeholder="내용을 입력하세요."
+                        class="h-36 w-full resize-none rounded bg-zinc-100 p-3 text-sm outline-none placeholder:text-zinc-400 focus:ring-1 focus:ring-zinc-400"></textarea>
+                </div>
+
+                <!-- 하단 -->
+                <div class="flex items-center justify-between pt-1">
+                    <label class="flex cursor-pointer items-center gap-2 text-xs">
+                        <input id="close-when-full" name="agree" type="checkbox" class="h-4 w-4 accent-zinc-500">
+                        인원이 모두 모이면 모집 종료하기
+                    </label>
+
+                    <button type="submit"
+                        class="rounded bg-zinc-400 px-10 py-3 text-sm font-semibold text-white hover:bg-zinc-500">
+                        작성하기
+                    </button>
+                </div>
+            </form>
+        </section>
     </main>
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script>
-      $("#month").on("change", function () {
-        let month = Number($(this).val());
-        let daySelect = $("#day");
+        $("#month").on("change", function () {
+            let month = Number($(this).val());
+            let daySelect = $("#day");
 
-        let lastDay = 31;
+            let lastDay = 31;
 
-        if ([4, 6, 9, 11].includes(month)) {
-          lastDay = 30;
-        } else if (month === 2) {
-          lastDay = 28;
-        }
-
-        daySelect.empty();
-        daySelect.append('<option value="">일</option>');
-
-        for (let day = 1; day <= lastDay; day++) {
-          daySelect.append(`<option value="${day}">${day}일</option>`);
-        }
-      });
-
-      $("#meet-form").on("submit", function (event) {
-        event.preventDefault();
-
-        let title = $("#title").val();
-        let content = $("#content").val();
-        let people = $("#people").val();
-        let month = $("#month").val();
-        let day = $("#day").val();
-        let time = $("#time").val();
-        let closeWhenFull = $("#close-when-full").is(":checked");
-
-        $.ajax({
-          type: "POST",
-          url: "/makeMeet",
-          data: {
-            title_give: title,
-            content_give: content,
-            people_give: people,
-            month_give: month,
-            day_give: day,
-            time_give: time,
-            closeWhenFull_give: closeWhenFull,
-          },
-          success: function (response) {
-            console.log(response);
-
-            if (response["result"] === "success") {
-              window.location.href = "/";
-            } else {
-              alert("등록에 실패했습니다.");
+            if ([4, 6, 9, 11].includes(month)) {
+                lastDay = 30;
+            } else if (month === 2) {
+                lastDay = 28;
             }
-          },
+
+            daySelect.empty();
+            daySelect.append('<option value="">일</option>');
+
+            for (let day = 1; day <= lastDay; day++) {
+                daySelect.append(`<option value="${day}">${day}일</option>`);
+            }
         });
-      });
+
+
+        $("#meet-form").on("submit", function (event) {
+            event.preventDefault();
+
+            let title = $("#title").val();
+            let content = $("#content").val();
+            let peopleCapacity = $("#peopleCapacity").val();
+            let month = $("#month").val();
+            let day = $("#day").val();
+            let time = $("#time").val();
+            let closeWhenFull = $("#close-when-full").is(":checked");
+
+            $.ajax({
+                type: "POST",
+                url: "/makeMeet",
+                data: {
+                    title_give: title,
+                    content_give: content,
+                    peopleCapacity_give: peopleCapacity,
+                    month_give: month,
+                    day_give: day,
+                    time_give: time,
+                    closeWhenFull_give: closeWhenFull
+                },
+                success: function (response) {
+                    console.log(response);
+
+                    if (response["result"] === "success") {
+                        window.location.href = "/main";
+                    } else {
+                        alert("등록에 실패했습니다.");
+                    }
+                }
+            });
+        });
     </script>
-  </body>
+</body>
+
 </html>
