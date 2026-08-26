@@ -41,8 +41,10 @@ def login_page():
     return render_template('login.html')
 
 @app.route('/main')
+@jwt_required()
 def main():
-    return render_template('main.html')
+    name = get_jwt_identity()
+    return render_template('main.html',name=name)
 
 # 회원가입 API
 @app.route('/api/register', methods=["POST"])
@@ -88,7 +90,7 @@ def checkID():
         'msg': '사용 가능한 아이디입니다.'
         })
 
-#로그인 기능
+
 
 
 # 로그인 API
@@ -122,6 +124,7 @@ def login():
         # return render_template('login.html', form=form)
 
 
+# user ID 메인페이지 
 
 #crud 기능
 @app.route('/post')
@@ -135,6 +138,7 @@ def post():
 def postUpdate():
     return render_template('postUpdate.html')
 
+# 포스트 글쓰기 페이지
 @app.route('/meetDetail', methods=['GET'])
 @jwt_required()
 def meets_detail():
@@ -156,6 +160,8 @@ def post_MakeMeet():
     time_receive = request.form['time_give']
     closeWhenFull_receive = request.form['closeWhenFull_give'] == 'true'
 
+    author = get_jwt_identity()
+
     meet = {
         'title': title_receive,
         'content': content_receive,
@@ -165,6 +171,7 @@ def post_MakeMeet():
         'day': day_receive,
         'time': time_receive,
         'closeWhenFull': closeWhenFull_receive,
+        'author': author,
         'createdAt': datetime.now()
     }
     db.meet.insert_one(meet)
