@@ -1,5 +1,6 @@
 import os
-from flask import Flask, jsonify, request, render_template
+from sched import scheduler
+from flask import Flask, jsonify, request, render_template, Response
 
 
 from flask_jwt_extended import JWTManager, create_access_token
@@ -94,30 +95,22 @@ def checkID():
 # 로그인 API
 @app.route('/api/login', methods=["POST"])
 def login():
-    # print("1. 로그인 함수 진입")
     getID = request.form['id_give']
     getPW = request.form['pw_give']
-    # print("2. id.pw 받음", getID)
     crypted_pw = hashlib.sha256(getPW.encode('utf-8')).hexdigest()
-    # print("3. PW hasing")
     result = db.users.find_one({'id':getID, 'pw':crypted_pw})
-    # print("4. DB searched.")
     if result :
         # JWT 토큰 생성 (timedelta의 매개변수로 유효시간 조절)
-        # print("5. Login Success")
         expires = timedelta(minutes=60)
         access_token = create_access_token(
             identity = getID,
             expires_delta = expires,
         )
-        # print("6. JWT Created.")
         response = jsonify({'result' : 'success', 'msg':'로그인 되었습니다.', "token": access_token})
         response.set_cookie('access_token', access_token, secure = False, samesite = 'Lax', httponly=True)
-        # print("7. Cookies set")
         # return jsonify({'result':'success', 'token':token})
         return response, 200
     else:
-        # print("5 Login Fail")
         return jsonify({'result':'fail','msg':'아이디 또는 비밀번호가 일치하지 않습니다.'})
         # return render_template('login.html', form=form)
 
@@ -276,6 +269,48 @@ def meet_join():
     )
 
     return jsonify({'result': 'success'})
+
+from flask_apscheduler import APScheduler
+from queue import Queue
+import time
+
+notification_queue = Queue()
+
+class Config:
+    SCHEDULER_API_ENABLED = True
+
+app.config.from_object(Config())
+
+
+@scheduler.task('interval', id='schedule_check', seconds = 5, misfire_grace_time = 900)
+def schedule_check():
+    query = {
+        "$expr" :{
+            "$gte" : ["$people", "$peopleCapacity"]
+        }
+    }
+    results = db.find(query) # 고정 사이즈 컬렉션에서 기본 순서는 삽입 순서와 같기 때문에 먼저 추가 된 순으로 탐색
+
+    for result in results:
+        document_id = result["_id"]
+
+        if document_id not in notified_ids:
+            notification_queue.put(result) # queue에 넣었다가 빼면서 알람을 주는 대신 바로 날리면 어떻지? / 알람을 날리는 방법?
+            notified_ids.add(document_id)
+
+@app.route("/notifications")
+def notifications():
+
+    def generate():
+        while True:
+
+            time.sleep(1)
+            yield f"data: 테스트 알림 \n\n" # data에는 알람 보낼 내용 채워야함
+
+    return Response(
+        generate(),
+        mimetype="text/event-stream"
+    )
 
 if __name__ == '__main__':
     app.run('0.0.0.0', port=5001, debug=True)

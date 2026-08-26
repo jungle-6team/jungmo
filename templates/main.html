@@ -127,6 +127,12 @@
         </article>`;
         $("#cards-box").append(temp);
       }
+
+      const eventSource = new EventSource("/notifications");
+
+      eventSource.onmessage = function(event){
+        console.log("알림", event.data);
+      }
     </script>
   </body>
 </html>
