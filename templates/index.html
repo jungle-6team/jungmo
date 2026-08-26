@@ -44,7 +44,7 @@
         </div>
 
         <div class="mt-auto p-5">
-          <button class="w-full rounded bg-white py-2 text-sm font-semibold">
+          <button class="w-full rounded bg-white py-2 text-sm font-semibold" onclick="logout()">
             로그아웃
           </button>
         </div>
@@ -136,6 +136,16 @@
           </a>
         </article>`;
         $("#cards-box").append(temp);
+      }
+      // 쿠키의 만료 시간이 과거면 즉시 만료
+      function deletecookie(name) {
+        document.cookie = name + '=; expires= Thu, 01 Jan 1970 00:00:01 GMT;';
+      }
+      // 쿠키 만료 이후 로그인 페이지로 이동
+      function logout() {
+        deletecookie(access_token);
+        alert(message = "로그아웃 되었습니다.")
+        window.location.href = "/login"
       }
     </script>
   </body>

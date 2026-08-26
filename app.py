@@ -79,34 +79,29 @@ def login_page():
 # 로그인 API
 @app.route('/api/login', methods=["POST"])
 def login():
-    # print("1. 로그인 함수 진입")
+
     getID = request.form['id_give']
     getPW = request.form['pw_give']
-    # print("2. id.pw 받음", getID)
+
     crypted_pw = hashlib.sha256(getPW.encode('utf-8')).hexdigest()
-    # print("3. PW hasing")
     result = db.users.find_one({'id':getID, 'pw':crypted_pw})
-    # print("4. DB searched.")
+
     if result :
         # JWT 토큰 생성 (timedelta의 매개변수로 유효시간 조절)
-        # print("5. Login Success")
         expires = timedelta(minutes=60)
         access_token = create_access_token(
             identity = getID,
             expires_delta = expires,
         )
-        # print("6. JWT Created.")
+
         response = jsonify({'result' : 'success', 'msg':'로그인 되었습니다.', "token": access_token})
         response.set_cookie('access_token', access_token, secure = True, samesite = 'Lax')
-        # print("7. Cookies set")
         # return jsonify({'result':'success', 'token':token})
         return response, 200
+    
     else:
-        # print("5 Login Fail")
         return jsonify({'result':'fail','msg':'아이디 / 비밀번호가 일치하지 않습니다.'})
         # return render_template('login.html', form=form)
-
-#회원가입 기능
 
 
 #crud 기능
