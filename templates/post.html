@@ -6,13 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>정모:정글모임</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='output.css') }}">
-    <!-- 프리텐다드 폰트 -->
-    <link
-      rel="stylesheet"
-      as="style"
-      crossorigin
-      href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css"
-    />
+
 </head>
 
 <body class="min-h-screen bg-zinc-100 font-sans text-zinc-600">
@@ -22,14 +16,14 @@
         <aside class="flex w-60 flex-col bg-zinc-200">
 
             <div class="px-5 py-7">
-                <p class="mb-2 text-sm text-zinc-500">ysb9912 님</p>
+                <p class="mb-2 text-sm text-zinc-500">{{user_id}}</p>
 
                 <a href="/post" class="block rounded bg-white py-2 text-center text-sm font-semibold text-zinc-400">
                     + 글쓰기
                 </a>
 
                 <nav class="mt-7 space-y-4 text-sm font-medium">
-                    <a href="/" class="block">전체 게시글</a>
+                    <a href="/main" class="block">전체 게시글</a>
                     <a href="#" class="block text-zinc-400">참여한 게시글</a>
                 </nav>
             </div>
@@ -86,9 +80,9 @@
                     </div>
 
                     <div class="w-28">
-                        <label for="people" class="mb-1 block text-xs">참여 인원</label>
+                        <label for="peopleCapacity" class="mb-1 block text-xs">참여 인원</label>
                         <div class="flex items-center gap-2">
-                            <input id="people" name="people" type="number" min="1"
+                            <input id="peopleCapacity" name="peopleCapacity" type="number" min="1"
                                 class="w-20 rounded border border-zinc-300 px-2 py-2 text-sm">
                             <span class="text-sm">명</span>
                         </div>
@@ -100,17 +94,6 @@
                     <label for="content" class="mb-1 block text-xs">본문 내용</label>
                     <textarea id="content" name="content" placeholder="내용을 입력하세요."
                         class="h-36 w-full resize-none rounded bg-zinc-100 p-3 text-sm outline-none placeholder:text-zinc-400 focus:ring-1 focus:ring-zinc-400"></textarea>
-                </div>
-
-                <!-- 이미지 업로드 -->
-                <div>
-                    <label for="image" class="mb-1 block text-xs">이미지 첨부</label>
-                    <label for="image"
-                        class="flex h-20 cursor-pointer items-center justify-center gap-3 rounded border border-zinc-300 text-zinc-400 hover:bg-zinc-50">
-                        <span class="text-2xl">🖼</span>
-                        <span class="font-semibold">이미지 업로드</span>
-                    </label>
-                    <input id="image" name="image" type="file" accept="image/*" class="hidden">
                 </div>
 
                 <!-- 하단 -->
@@ -156,7 +139,7 @@
 
             let title = $("#title").val();
             let content = $("#content").val();
-            let people = $("#people").val();
+            let peopleCapacity = $("#peopleCapacity").val();
             let month = $("#month").val();
             let day = $("#day").val();
             let time = $("#time").val();
@@ -168,7 +151,7 @@
                 data: {
                     title_give: title,
                     content_give: content,
-                    people_give: people,
+                    peopleCapacity_give: peopleCapacity,
                     month_give: month,
                     day_give: day,
                     time_give: time,
@@ -178,7 +161,7 @@
                     console.log(response);
 
                     if (response["result"] === "success") {
-                        window.location.href = "/";
+                        window.location.href = "/main";
                     } else {
                         alert("등록에 실패했습니다.");
                     }
