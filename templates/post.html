@@ -16,14 +16,14 @@
         <aside class="flex w-60 flex-col bg-zinc-200">
 
             <div class="px-5 py-7">
-                <p class="mb-2 text-sm text-zinc-500">ysb9912 님</p>
+                <p class="mb-2 text-sm text-zinc-500">{{user_id}}</p>
 
                 <a href="/post" class="block rounded bg-white py-2 text-center text-sm font-semibold text-zinc-400">
                     + 글쓰기
                 </a>
 
                 <nav class="mt-7 space-y-4 text-sm font-medium">
-                    <a href="/" class="block">전체 게시글</a>
+                    <a href="/main" class="block">전체 게시글</a>
                     <a href="#" class="block text-zinc-400">참여한 게시글</a>
                 </nav>
             </div>
@@ -80,9 +80,9 @@
                     </div>
 
                     <div class="w-28">
-                        <label for="people" class="mb-1 block text-xs">참여 인원</label>
+                        <label for="peopleCapacity" class="mb-1 block text-xs">참여 인원</label>
                         <div class="flex items-center gap-2">
-                            <input id="people" name="people" type="number" min="1"
+                            <input id="peopleCapacity" name="peopleCapacity" type="number" min="1"
                                 class="w-20 rounded border border-zinc-300 px-2 py-2 text-sm">
                             <span class="text-sm">명</span>
                         </div>
@@ -150,7 +150,7 @@
 
             let title = $("#title").val();
             let content = $("#content").val();
-            let people = $("#people").val();
+            let peopleCapacity = $("#peopleCapacity").val();
             let month = $("#month").val();
             let day = $("#day").val();
             let time = $("#time").val();
@@ -162,7 +162,7 @@
                 data: {
                     title_give: title,
                     content_give: content,
-                    people_give: people,
+                    peopleCapacity_give: peopleCapacity,
                     month_give: month,
                     day_give: day,
                     time_give: time,
@@ -172,7 +172,7 @@
                     console.log(response);
 
                     if (response["result"] === "success") {
-                        window.location.href = "/";
+                        window.location.href = "/main";
                     } else {
                         alert("등록에 실패했습니다.");
                     }
